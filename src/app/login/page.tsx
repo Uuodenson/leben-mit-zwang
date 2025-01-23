@@ -1,11 +1,11 @@
 'use client'
 import { fbapp } from "@/firebase";
-import { signInWithEmailAndPassword, getAuth, User, onAuthStateChanged } from "firebase/auth";
-import { ChangeEvent, JSX, useEffect, useState } from "react";
-export default function login(): JSX.Element {
+import { signInWithEmailAndPassword, getAuth, User } from "firebase/auth";
+import { ChangeEvent, Dispatch, JSX, SetStateAction, useState } from "react";
+export default function Login(): JSX.Element {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [user, setUser]: [any | null, Function] = useState(null)
+    const [user, setUser]: [User | undefined, Dispatch<SetStateAction<User | undefined>>] = useState()
     async function handleSubmit(e: ChangeEvent<HTMLFormElement>): Promise<void> {
         e.preventDefault()
         const auth = getAuth(fbapp);
@@ -19,9 +19,7 @@ export default function login(): JSX.Element {
                 window.location.href = "/profile";
             })
             .catch((error) => {
-                const errorCode = error.
-                    code;
-                const errorMessage = error.message;
+                console.log(error)
             });
     }
     return (

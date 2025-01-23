@@ -1,8 +1,5 @@
-import { Analytics, getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { JSX } from "react";
 const firebaseConfig = {
     apiKey: "AIzaSyCcHErKKMChASKp7yLgBRH5xE_nwMIC7C8",
     authDomain: "lebem-mit-zwang.firebaseapp.com",

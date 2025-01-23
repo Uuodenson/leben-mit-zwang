@@ -1,12 +1,12 @@
 'use client'
 import { fbapp, db } from "@/firebase";
 import { createUserWithEmailAndPassword, getAuth, User } from "firebase/auth";
-import { ChangeEvent, JSX, useState } from "react";
+import { ChangeEvent, Dispatch, JSX, SetStateAction, useState } from "react";
 import { setDoc, doc } from "firebase/firestore"
-export default function signup(): JSX.Element {
+export default function Signup(): JSX.Element {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [user, setUser]: [User | null, Function] = useState(null)
+    const [user, setUser]: [User | undefined, Dispatch<SetStateAction<User | undefined>>] = useState()
 
     async function handleSubmit(e: ChangeEvent<HTMLFormElement>): Promise<void> {
         e.preventDefault()

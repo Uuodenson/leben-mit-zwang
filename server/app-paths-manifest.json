@@ -1,10 +1,10 @@
 {
-  "/favicon.ico/route": "app/favicon.ico/route.js",
   "/_not-found/page": "app/_not-found/page.js",
-  "/login/page": "app/login/page.js",
-  "/profile/page": "app/profile/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
   "/contact/page": "app/contact/page.js",
+  "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/singup/page": "app/singup/page.js",
-  "/settings/page": "app/settings/page.js"
+  "/profile/page": "app/profile/page.js",
+  "/settings/page": "app/settings/page.js",
+  "/singup/page": "app/singup/page.js"
 }

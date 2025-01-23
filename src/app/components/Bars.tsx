@@ -56,15 +56,15 @@ export function Navbartop(): JSX.Element {
               {(!isMobile && hasMounted) && (
                 <>
                   <div className="flex items-center space-x-4">
-                    <a href="/about" className="text-white hover:text-gray-300">
+                    <Link href="/about" className="text-white hover:text-gray-300">
                       Über uns
-                    </a>
-                    <a href="/services" className="text-white hover:text-gray-300">
+                    </Link>
+                    <Link href="/services" className="text-white hover:text-gray-300">
                       Angebote
-                    </a>
-                    <a href="/contact" className="text-white hover:text-gray-300">
+                    </Link>
+                    <Link href="/contact" className="text-white hover:text-gray-300">
                       Kontakt
-                    </a>
+                    </Link>
                   </div>
                 </>
               )}

@@ -1,6 +1,7 @@
 'use client'
 import { fbapp } from "@/firebase";
 import { signInWithEmailAndPassword, getAuth, User } from "firebase/auth";
+import Link from "next/link";
 import { ChangeEvent, Dispatch, JSX, SetStateAction, useState } from "react";
 export default function Login(): JSX.Element {
     const [email, setEmail] = useState("")
@@ -63,9 +64,9 @@ export default function Login(): JSX.Element {
                     </button>
                     <p className="text-center text-gray-600">
                         No Accountt?{" "}
-                        <a href="/singup" className="text-blue-500 hover:underline">
+                        <Link href="/singup" className="text-blue-500 hover:underline">
                             Signup
-                        </a>
+                        </Link>
                     </p>
                 </form>
             </div>

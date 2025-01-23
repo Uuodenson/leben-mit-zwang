@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "gh-pages -d .next"
+    "deploy": "gh-pages -d out"
   },
   "dependencies": {
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
@@ -30,5 +30,5 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   },
-  "homepage": "https://uuodenson.github.io/leben-mit-zwang/"
+  "homepage": "https://uuodenson.github.io"
 }

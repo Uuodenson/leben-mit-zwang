@@ -34,7 +34,7 @@ export default function Profile(): JSX.Element {
     async function handleSignOut(){
         try{
             await getAuth(fbapp).signOut();
-            window.location.href = "/leben-mit-zwang/login";
+            window.location.href = "/login";
             console.log("User signed out!");
         } catch(error) {
             console.error(error)

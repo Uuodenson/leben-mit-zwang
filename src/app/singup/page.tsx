@@ -72,7 +72,7 @@ export default function Signup(): JSX.Element {
                     </button>
                     <p className="text-center text-gray-600">
                         Already registered?{" "}
-                        <a href="/leben-mit-zwang/login" className="text-blue-500 hover:underline">
+                        <a href="/login" className="text-blue-500 hover:underline">
                             Login
                         </a>
                     </p>

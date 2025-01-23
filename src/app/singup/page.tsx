@@ -3,6 +3,7 @@ import { fbapp, db } from "@/firebase";
 import { createUserWithEmailAndPassword, getAuth, User } from "firebase/auth";
 import { ChangeEvent, Dispatch, JSX, SetStateAction, useState } from "react";
 import { setDoc, doc } from "firebase/firestore"
+import Link from "next/link";
 export default function Signup(): JSX.Element {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -72,9 +73,9 @@ export default function Signup(): JSX.Element {
                     </button>
                     <p className="text-center text-gray-600">
                         Already registered?{" "}
-                        <a href="/login" className="text-blue-500 hover:underline">
+                        <Link href="/login" className="text-blue-500 hover:underline">
                             Login
-                        </a>
+                        </Link>
                     </p>
                 </form>
             </div>

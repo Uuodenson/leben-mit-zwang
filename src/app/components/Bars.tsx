@@ -86,7 +86,7 @@ export function Navbartop(): JSX.Element {
           )}
         </nav>
         {(!loggedIn && hasMounted) && (<>
-        <button className="fixed bottom-0 right-1/2" onClick={()=>{window.location.href = "/login"}}>Log in</button>
+        <Link href={"/login"} className="fixed bottom-0 right-1/2">Log in</Link>
         </>)}
       </>
     );

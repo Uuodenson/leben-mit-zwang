@@ -16,7 +16,7 @@ export default function Login(): JSX.Element {
                 setUser(user);
                 localStorage.setItem("user", JSON.stringify(user))
                 console.log("User logged in", user);
-                window.location.href = "/profile";
+                window.location.href = "/leben-mit-zwang/profile";
             })
             .catch((error) => {
                 console.log(error)

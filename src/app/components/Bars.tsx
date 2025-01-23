@@ -28,7 +28,7 @@ export function Navbartop(): JSX.Element {
   {/* Suggested code may be subject to a license. Learn more: ~LicenseLog:497104064. */}
         <nav className="bg-gray-800 p-4 rounded-b-2xl">
           <div className="container mx-auto flex justify-between items-center">
-            <Link href="/" className="text-white text-lg font-bold">
+            <Link href="/leben-mit-zwang/" className="text-white text-lg font-bold">
               Leben mit zwang
             </Link>
             <div>
@@ -56,13 +56,13 @@ export function Navbartop(): JSX.Element {
               {(!isMobile && hasMounted) && (
                 <>
                   <div className="flex items-center space-x-4">
-                    <a href="/about" className="text-white hover:text-gray-300">
+                    <a href="/leben-mit-zwang/about" className="text-white hover:text-gray-300">
                       Über uns
                     </a>
-                    <a href="/services" className="text-white hover:text-gray-300">
+                    <a href="/leben-mit-zwang/services" className="text-white hover:text-gray-300">
                       Angebote
                     </a>
-                    <a href="/contact" className="text-white hover:text-gray-300">
+                    <a href="/leben-mit-zwang/contact" className="text-white hover:text-gray-300">
                       Kontakt
                     </a>
                   </div>
@@ -73,13 +73,13 @@ export function Navbartop(): JSX.Element {
           </div>
           {(isOpen && isMobile && hasMounted) && (
             <div className="md:hidden">
-              <Link href="/about" className="block text-white py-2 px-4 hover:bg-gray-700">
+              <Link href="/leben-mit-zwang/about" className="block text-white py-2 px-4 hover:bg-gray-700">
                 Über uns
               </Link>
-              <Link href="/services" className="block text-white py-2 px-4 hover:bg-gray-700">
+              <Link href="/leben-mit-zwang/services" className="block text-white py-2 px-4 hover:bg-gray-700">
                 Angebote
               </Link>
-              <Link href="/contact" className="block text-white py-2 px-4 hover:bg-gray-700">
+              <Link href="/leben-mit-zwang/contact" className="block text-white py-2 px-4 hover:bg-gray-700">
                 Kontakt
               </Link>
             </div>

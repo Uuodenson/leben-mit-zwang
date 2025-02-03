@@ -1,5 +1,5 @@
 'use client'
-import { fbapp } from "@/firebase";
+import fbapp  from "@/lib/api/firebase";
 import { signInWithEmailAndPassword, getAuth, User } from "firebase/auth";
 import Link from "next/link";
 import { ChangeEvent, Dispatch, JSX, SetStateAction, useState } from "react";

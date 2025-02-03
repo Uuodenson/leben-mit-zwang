@@ -1,14 +1,14 @@
-"use client"
+'use client';
+
 import fbapp, { db } from "@/lib/api/firebase";
 import { getAuth, User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { Navbartop } from "../components/Bars";
-import ProfileHeader from "@/components/profile/ProfileHeader";
-import ProfileDetails from "@/components/profile/ProfileDetails";
+import { Navbartop } from "../../components/Bars";
+import EditProfileForm from "@/components/profile/EditProfileForm";
 import { useRouter } from "next/navigation";
 
-export default function Profile() {
+export default function EditProfile() {
   const [user, setUser] = useState<User | null>(null);
   const [userDetails, setUserDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -43,14 +43,8 @@ export default function Profile() {
     return () => unsubscribe();
   }, [router]);
 
-  const handleSignOut = async () => {
-    try {
-      const auth = getAuth(fbapp);
-      await auth.signOut();
-      router.push('/login');
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+  const handleSuccess = () => {
+    router.push('/profile');
   };
 
   if (loading) {
@@ -69,7 +63,7 @@ export default function Profile() {
       <div className="min-h-screen bg-gray-100">
         <Navbartop />
         <div className="flex items-center justify-center min-h-screen">
-          <p className="text-gray-600">Please log in to view your profile.</p>
+          <p className="text-gray-600">Please log in to edit your profile.</p>
         </div>
       </div>
     );
@@ -79,8 +73,16 @@ export default function Profile() {
     <div className="min-h-screen bg-gray-100">
       <Navbartop />
       <div className="container mx-auto px-4 py-8">
-        <ProfileHeader user={user} onSignOut={handleSignOut} />
-        <ProfileDetails userDetails={userDetails} />
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h1>
+            <EditProfileForm
+              user={user}
+              userDetails={userDetails}
+              onSuccess={handleSuccess}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

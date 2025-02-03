@@ -1,53 +1,36 @@
 'use client';
 
-import { db } from '@/lib/api/firebase';
 import { User } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useState } from 'react';
+import { db } from '@/lib/api/firebase';
 
-interface OCDQuestion {
+interface Question {
   id: number;
   text: string;
   category: string;
 }
 
-const questions: OCDQuestion[] = [
-  // Contamination OCD
-  { id: 1, text: "I spend a lot of time cleaning or washing to avoid contamination", category: "contamination" },
-  { id: 2, text: "I worry excessively about germs and diseases", category: "contamination" },
-  { id: 3, text: "I avoid touching certain objects or surfaces due to contamination fears", category: "contamination" },
-  
-  // Checking OCD
-  { id: 4, text: "I repeatedly check things like locks, switches, or appliances", category: "checking" },
-  { id: 5, text: "I need to check and recheck to ensure nothing bad will happen", category: "checking" },
-  { id: 6, text: "I retrace my steps to make sure I haven't harmed anyone", category: "checking" },
-  
-  // Symmetry OCD
-  { id: 7, text: "I need things to be arranged in a particular order", category: "symmetry" },
-  { id: 8, text: "I feel distressed when objects aren't perfectly aligned", category: "symmetry" },
-  { id: 9, text: "I spend excessive time making things symmetrical or balanced", category: "symmetry" },
-  
-  // Intrusive Thoughts
-  { id: 10, text: "I experience unwanted, disturbing thoughts that won't go away", category: "intrusive" },
-  { id: 11, text: "I have distressing thoughts that go against my values", category: "intrusive" },
-  { id: 12, text: "I try to suppress or neutralize disturbing thoughts", category: "intrusive" },
-  
-  // Hoarding
-  { id: 13, text: "I find it difficult to discard items, even if they're not needed", category: "hoarding" },
-  { id: 14, text: "I collect items excessively and feel anxious about discarding them", category: "hoarding" },
-  { id: 15, text: "My living space is cluttered with items I can't part with", category: "hoarding" },
+const questions: Question[] = [
+  { id: 1, text: 'Ich überprüfe Dinge öfter als nötig', category: 'checking' },
+  { id: 2, text: 'Ich wasche meine Hände öfter als andere Menschen', category: 'contamination' },
+  { id: 3, text: 'Ich muss Dinge in einer bestimmten Reihenfolge ordnen', category: 'symmetry' },
+  { id: 4, text: 'Ich habe störende Gedanken, die ich nicht kontrollieren kann', category: 'intrusive' },
+  { id: 5, text: 'Ich verbringe viel Zeit damit, Dinge zu reinigen', category: 'contamination' },
+  { id: 6, text: 'Ich überprüfe Türen und Fenster mehrmals', category: 'checking' },
+  { id: 7, text: 'Ich brauche Symmetrie in meiner Umgebung', category: 'symmetry' },
+  { id: 8, text: 'Ich habe aggressive oder beängstigende Gedanken', category: 'intrusive' },
 ];
 
-interface OCDQuestionsProps {
+interface Props {
   user: User;
-  onComplete: () => void;
+  onComplete?: () => void;
 }
 
-export default function OCDQuestions({ user, onComplete }: OCDQuestionsProps) {
+export default function OCDQuestions({ user, onComplete }: Props) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
-  const [loading, setLoading] = useState(false);
-  const [showResults, setShowResults] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAnswer = async (value: number) => {
     const newAnswers = { ...answers, [questions[currentQuestion].id]: value };
@@ -56,139 +39,134 @@ export default function OCDQuestions({ user, onComplete }: OCDQuestionsProps) {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      setLoading(true);
+      setIsSubmitting(true);
+      const results = calculateResults(newAnswers);
+      
       try {
-        // Calculate results
-        const results = calculateResults(newAnswers);
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        const userData = userDoc.exists() ? userDoc.data() : {};
         
-        // Save to Firestore
-        await setDoc(doc(db, "users", user.uid), {
+        await setDoc(userRef, {
+          ...userData,
           ocdAssessment: {
+            timestamp: Date.now(),
             answers: newAnswers,
-            results,
-            timestamp: new Date().toISOString(),
+            results
           }
-        }, { merge: true });
+        });
 
-        setShowResults(true);
+        onComplete?.();
       } catch (error) {
-        console.error("Error saving assessment:", error);
-      } finally {
-        setLoading(false);
+        console.error('Error saving assessment:', error);
       }
+      
+      setIsSubmitting(false);
     }
   };
 
   const calculateResults = (answers: { [key: number]: number }) => {
-    const scores: { [key: string]: { score: number; count: number } } = {
-      contamination: { score: 0, count: 0 },
-      checking: { score: 0, count: 0 },
-      symmetry: { score: 0, count: 0 },
-      intrusive: { score: 0, count: 0 },
-      hoarding: { score: 0, count: 0 },
-    };
-
-    questions.forEach(q => {
-      if (answers[q.id]) {
-        scores[q.category].score += answers[q.id];
-        scores[q.category].count++;
-      }
+    const categories = ['checking', 'contamination', 'symmetry', 'intrusive'];
+    const scores = categories.map(category => {
+      const categoryQuestions = questions.filter(q => q.category === category);
+      const sum = categoryQuestions.reduce((acc, q) => acc + (answers[q.id] || 0), 0);
+      return {
+        category,
+        averageScore: sum / categoryQuestions.length
+      };
     });
 
-    const results = Object.entries(scores).map(([category, data]) => ({
-      category,
-      averageScore: data.count > 0 ? data.score / data.count : 0,
-    }));
+    const primaryType = scores.reduce((max, score) => 
+      score.averageScore > max.averageScore ? score : max
+    ).category;
 
     return {
-      scores: results,
-      primaryType: results.reduce((a, b) => 
-        a.averageScore > b.averageScore ? a : b
-      ).category,
+      primaryType,
+      scores
     };
   };
 
-  if (showResults) {
-    const results = calculateResults(answers);
+  const getProgressPercentage = () => {
+    return ((currentQuestion + 1) / questions.length) * 100;
+  };
+
+  if (isSubmitting) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">Assessment Results</h2>
-        <div className="space-y-4">
-          <p className="text-lg">
-            Based on your responses, you show characteristics primarily associated with:
-            <span className="font-bold text-blue-600 ml-2">
-              {results.primaryType.charAt(0).toUpperCase() + results.primaryType.slice(1)} OCD
-            </span>
-          </p>
-          <div className="mt-4">
-            <h3 className="font-semibold mb-2">Detailed Scores:</h3>
-            {results.scores.map(({ category, averageScore }) => (
-              <div key={category} className="flex items-center mb-2">
-                <div className="w-32 text-gray-600">
-                  {category.charAt(0).toUpperCase() + category.slice(1)}:
-                </div>
-                <div className="flex-1">
-                  <div className="h-4 bg-gray-200 rounded-full">
-                    <div
-                      className="h-4 bg-blue-500 rounded-full"
-                      style={{ width: `${(averageScore / 5) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="ml-2 text-sm text-gray-600">
-                  {averageScore.toFixed(1)}/5
-                </div>
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={onComplete}
-            className="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Continue
-          </button>
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Speichere Ergebnisse...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-bold">OCD Assessment</h2>
-          <span className="text-sm text-gray-500">
-            Question {currentQuestion + 1} of {questions.length}
-          </span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+    <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto">
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+            className="h-full bg-blue-500 transition-all duration-300"
+            style={{ width: `${getProgressPercentage()}%` }}
           ></div>
+        </div>
+        <div className="mt-2 text-sm text-gray-600 text-right">
+          Frage {currentQuestion + 1} von {questions.length}
         </div>
       </div>
 
+      {/* Question */}
       <div className="mb-8">
-        <h3 className="text-lg mb-4">{questions[currentQuestion].text}</h3>
-        <div className="grid grid-cols-5 gap-2">
-          {[1, 2, 3, 4, 5].map((value) => (
-            <button
-              key={value}
-              onClick={() => handleAnswer(value)}
-              disabled={loading}
-              className={`p-4 border rounded-lg hover:bg-blue-50 transition-colors
-                ${answers[questions[currentQuestion].id] === value ? 'bg-blue-100 border-blue-500' : 'border-gray-200'}
-                ${loading ? 'opacity-50 cursor-not-allowed' : ''}
-              `}
-            >
-              {value}
-            </button>
-          ))}
-        </div>
-        <div className="mt-2 text-sm text-gray-500 flex justify-between">
-          <span>Never</span>
-          <span>Always</span>
+        <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-4">
+          {questions[currentQuestion].text}
+        </h2>
+        <p className="text-gray-600 text-sm md:text-base">
+          Bewerten Sie auf einer Skala von 1 bis 5, wie sehr diese Aussage auf Sie zutrifft.
+        </p>
+      </div>
+
+      {/* Answer Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+        {[1, 2, 3, 4, 5].map((value) => (
+          <button
+            key={value}
+            onClick={() => handleAnswer(value)}
+            className={`
+              p-4 rounded-lg text-center transition-all duration-200
+              ${
+                answers[questions[currentQuestion].id] === value
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+              }
+            `}
+          >
+            <div className="text-lg md:text-xl font-semibold">{value}</div>
+            <div className="text-xs md:text-sm mt-1">
+              {value === 1 ? 'Trifft nicht zu' : value === 5 ? 'Trifft sehr zu' : ''}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="mt-8 flex justify-between">
+        <button
+          onClick={() => setCurrentQuestion(Math.max(0, currentQuestion - 1))}
+          disabled={currentQuestion === 0}
+          className={`
+            px-4 py-2 rounded-lg transition-colors
+            ${
+              currentQuestion === 0
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+            }
+          `}
+        >
+          Zurück
+        </button>
+        <div className="text-sm text-gray-500">
+          Sie können Ihre Antworten später noch ändern
         </div>
       </div>
     </div>

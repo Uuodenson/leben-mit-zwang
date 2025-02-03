@@ -10,33 +10,16 @@ import { useRouter } from "next/navigation";
 
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
-  const [userDetails, setUserDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const auth = getAuth(fbapp);
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        try {
-          const docRef = doc(db, "users", currentUser.uid);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            setUserDetails({
-              ...docSnap.data(),
-              displayName: currentUser.displayName,
-              email: currentUser.email,
-              phoneNumber: currentUser.phoneNumber,
-              photoURL: currentUser.photoURL,
-            });
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      } else {
+      if (!currentUser) {
         router.push('/login');
       }
+      setUser(currentUser);
       setLoading(false);
     });
 
@@ -57,31 +40,22 @@ export default function Profile() {
     return (
       <div className="min-h-screen bg-gray-100">
         <Navbartop />
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex justify-center items-center min-h-[calc(100vh-64px)]">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       </div>
     );
   }
 
-  if (!user || !userDetails) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <Navbartop />
-        <div className="flex items-center justify-center min-h-screen">
-          <p className="text-gray-600">Please log in to view your profile.</p>
-        </div>
-      </div>
-    );
+  if (!user) {
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
       <Navbartop />
-      <div className="container mx-auto px-4 py-8">
-        <ProfileHeader user={user} onSignOut={handleSignOut} />
-        <ProfileDetails userDetails={userDetails} />
-      </div>
+      <ProfileHeader user={user} onSignOut={handleSignOut} />
+      <ProfileDetails user={user} />
     </div>
   );
 }

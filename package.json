@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "gh-pages -d out"
+    "export": "next export",
+    "deploy": "next build && next export && gh-pages -d out",
+    "deploy-no-lint": "NEXT_DISABLE_ESLINT=1 next build && next export && gh-pages -d out"
   },
   "dependencies": {
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
